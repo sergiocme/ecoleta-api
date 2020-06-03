@@ -30,7 +30,7 @@ app.get('/users', (request, response) => {
   return response.json(searchedUsers);
 });
 
-app.get('/users:id', (request, response) => {
+app.get('/users/:id', (request, response) => {
   const id = Number(request.params.id);
 
   return response.json(users[id]);
