@@ -1,6 +1,7 @@
 import express from 'express';
 
 const app = express();
+app.use(express.json());
 
 const users = [
   {
@@ -36,13 +37,12 @@ app.get('/users:id', (request, response) => {
 });
 
 app.post('/users', (request, response) => {
-  const user = {
-    name: 'Diego Fernandes',
-    email: 'diegofernandes@rocketseat.com.br',
-  }
+  const { name, email } = request.body;
+
+  const user = { name, email };
 
   users.push(user);
-  return response.send();
+  return response.json(user);
 });
 
 app.listen(3333);
