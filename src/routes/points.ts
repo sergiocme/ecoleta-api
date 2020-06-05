@@ -59,4 +59,20 @@ router.post('/points', async (request, response) => {
   }
 });
 
+router.get('/points/:id', async (request, response) => {
+  const { id } = request.params;
+
+  const point = await knex('points')
+    .where({ id })
+    .select('*')
+    .first();
+
+  const items = await knex('point_items')
+    .join('items', 'point_items.item_id', '=', 'items.id')
+    .where('point_items.point_id', id)
+    .select('items.*');
+
+  return response.json({ ...point, items });
+});
+
 export default router;
