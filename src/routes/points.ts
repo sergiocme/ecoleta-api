@@ -5,6 +5,22 @@ import knex from '../database/connection';
 
 const router = Router();
 
+router.get('/points', async (request, response) => {
+  const { city, federal_state, items } = request.query;
+
+  const parsedItems = String(items).split(',')
+    .map((item) => Number(item.trim()));
+
+  const points = await knex('points')
+    .join('point_items', 'points.id', '=', 'point_items.point_id')
+    .whereIn('point_items.item_id', parsedItems)
+    .where({ city: String(city), federal_state: String(federal_state) })
+    .distinct()
+    .select('points.*');
+
+  return response.json({ points });
+});
+
 router.post('/points', async (request, response) => {
   // uuid as id
   // facade_photo null
