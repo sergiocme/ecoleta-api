@@ -17,32 +17,45 @@ router.post('/points', async (request, response) => {
   // federal_state
   // items relation
 
-  const {
-    name,
-    email,
-    whatsapp,
-    geolocation,
-    postal_address,
-    city,
-    federal_state,
-    items,
-  } = request.body;
+  const point = {
+    id: uuid(),
+    name: request.body.name,
+    email: request.body.email,
+    whatsapp: request.body.whatsapp,
+    geolocation: request.body.geolocation,
+    postal_address: request.body.postal_address,
+    city: request.body.city,
+    federal_state: request.body.federal_state,
+  };
+
+  const items = request.body.items.filter((item: number, index: number) => {
+    return request.body.items.indexOf(item) === index;
+  });
+
+  const foundItems = await knex('items').select('*').whereIn('id', items);
+
+  if (items.length > foundItems.length) return response.status(400).json({ message: 'Invalid items' });
+
+  const insertPointItemsData = items.map((item_id: number) => {
+    return {
+      point_id: point.id,
+      item_id: item_id,
+    };
+  });
 
   try {
-    await knex('points').insert({
-      id: uuid(),
-      name,
-      email,
-      whatsapp,
-      geolocation,
-      postal_address,
-      city,
-      federal_state,
+    await knex.transaction(async (context) => {
+      await context('points').insert(point);
+
+      await context('point_items').insert(insertPointItemsData);
+
+      await context.commit();
     });
 
-    return response.send();
+    return response.json({ ...point, items });
   } catch (error) {
-    console.log('error: ', error);
+    console.error('database error: ', error);
+    return response.status(500).json({ error: 'Unable to create point'});
   }
 });
 

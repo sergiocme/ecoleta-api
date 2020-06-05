@@ -1,2 +1,5 @@
 # Folder
 /node_modules/
+
+# Files
+src/database/database.sqlite
